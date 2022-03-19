@@ -4,9 +4,9 @@ import torchvision.models as models
 BASIC_CONFIG = {
     'network': 'resnet50',  # shoud be one name in NET_CONFIG below
     'data_path': None,
-    'data_index': '/data1/yijin/workspace/dataset/data_index/EyeQ_normal_dataset.pkl',  # alternative way to build dataset
-    'save_path': '/data1/yijin/workspace/result/anomaly_detection/l2v_test',
-    'record_path': '/data1/yijin/workspace/result/anomaly_detection/l2v_test/log',
+    'data_index': '/path/to/dataset_index',  # alternative way to build dataset
+    'save_path': '/path/to/save_folder',
+    'record_path': '/path/to/log_folder',
     'pretrained': False,  # load weights from pre-trained model training on ImageNet
     'checkpoint': None,  # load weights from other pretrained model
     'num_classes': 3,  # number of categories

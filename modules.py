@@ -32,6 +32,7 @@ def generate_model(device, pretrained=True, checkpoint=None, args={}):
     return model, discriminator
 
 
+# from patchGAN implementation
 class NLayerDiscriminator(nn.Module):
     """Defines a PatchGAN discriminator"""
 

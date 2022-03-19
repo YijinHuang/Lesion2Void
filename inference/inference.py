@@ -77,7 +77,11 @@ def predict(model, batch_size, preprocess, device, imgs, npy_folder, grid_size, 
 
 if __name__ == "__main__":
     random.seed(0)
-    weights_path = '/data1/yijin/workspace/result/anomaly_detection/l2v_test/best_validation_weights.pt'
+    weights_path = '/path/to/model_save_folder/best_validation_weights.pt'
+    eyeQ_test_folder = '/path/to/EyeQ/test/folder'
+    diffs_save_folder = '/path/to/save/difference/result'
+
+
     device = 'cuda'
     model = load_model(weights_path, device)
     preprocess = define_preprocess()
@@ -85,8 +89,8 @@ if __name__ == "__main__":
     pixel_size = 16
     batch_size = 64
     for i in range(5):
-        src = '/data1/yijin/workspace/dataset/EyeQ/split_EyeQ/test/{}'.format(i)
-        npy_folder = './diffs/test_l2v_{}.npy'.format(i)
+        src = '{}/{}'.format(eyeQ_test_folder, i)
+        npy_folder = '{}/grade_{}.npy'.format(diffs_save_folder, i)
         imgs = [os.path.join(src, img) for img in os.listdir(src)]
 
         result = predict(model, batch_size, preprocess, device, imgs, npy_folder, gride_size, pixel_size)

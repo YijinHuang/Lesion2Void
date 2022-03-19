@@ -76,14 +76,8 @@ def auc(neg, pos):
 
 
 if __name__ == '__main__':
-    folder = 'test_sm'
+    diffs_save_folder = '/path/to/save/difference/result'
     eval_channel = 1
     eval_grade = range(1, 5)
-    main(folder, eval_channel, eval_grade)
+    main(diffs_save_folder, eval_channel, eval_grade)
 
-
-# 0.558523
-# 0.586104
-# 0.838532
-# 0.863557
-# 0.603609

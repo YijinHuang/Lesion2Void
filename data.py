@@ -119,7 +119,6 @@ class CustomizedImageFolder(datasets.ImageFolder):
 class DatasetFromDict(Dataset):
     def __init__(self, imgs, transform=None, loader=pil_loader, hasmask=False):
         super(DatasetFromDict, self).__init__()
-        imgs = [(img_path.replace('/mnt/', '/data1/'), mask_path.replace('/mnt/', '/data1/')) for img_path, mask_path in imgs]
         self.imgs = imgs
         self.loader = loader
         self.transform = transform
