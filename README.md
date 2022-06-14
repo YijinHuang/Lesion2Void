@@ -25,8 +25,8 @@ Required environment:
 
 
 ### Dataset
-1. Download [EyeQ](https://github.com/HzFu/EyeQ) dataset. Then use `dataset/crop.py` to remove the black border of images and resize them to 512 x 512.
-2. Organize the EyeQ dataset as follow. Here, `val` and `test` directory have the same structure of train.
+1. Download [EyeQ](https://github.com/HzFu/EyeQ) dataset. Then use `dataset/crop.py` to remove the black border of images and resize them to 512 x 512. And then use `dataset/preprocess.py` to enhance fundus images.
+2. Organize the pre-processed EyeQ dataset as follow. Here, `val` and `test` directory have the same structure of `train`.
 ```
 ├── your_data_dir
     ├── train
@@ -44,7 +44,7 @@ Required environment:
     ├── test
 ```
 
-3. Generate FOV masks for each image using `dataset/fov_mask.py`. (will be updated soon)
+3. Generate FOV masks for each image using `dataset/fov_mask.py`. (will be updated soon. You can also simply use a circle as a FOV mask.)
 4. Define a dict that only contains normal samples as follow. Then save it using pickle.
 ```
 your_data_dict = {
@@ -87,4 +87,18 @@ $ CUDA_VISIBLE_DEVICES=x python inference.py --weights-path /path/to/model_save_
 2. Post-processing and calculate AUC:
 ```
 $ python auc.py --diff-dir /path/to/save/difference/result
+```
+
+
+
+### Citation
+```
+@inproceedings{huang2022lesion2void,
+  title={Lesion2void: Unsupervised Anomaly Detection in Fundus Images},
+  author={Huang, Yijin and Huang, Weikai and Luo, Wenhao and Tang, Xiaoying},
+  booktitle={2022 IEEE 19th International Symposium on Biomedical Imaging (ISBI)},
+  pages={1--5},
+  year={2022},
+  organization={IEEE}
+}
 ```
