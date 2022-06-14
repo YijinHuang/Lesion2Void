@@ -20,7 +20,7 @@ def train(model, discriminator, train_config, data_config, train_dataset, val_da
     train_loader, val_loader = initialize_dataloader(train_config, train_dataset, val_dataset, weighted_sampler)
 
     adv_loss_function = nn.MSELoss()
-    masker = Masker(width=48, pixel_size=16, mode='random')
+    masker = Masker(width=train_config['grid_size'], pixel_size=train_config['patch_size'], mode='random')
 
     # start training
     model.train()

@@ -1,6 +1,7 @@
 import os
 import pickle
 
+import torch
 from torch.utils.data import Dataset
 from torchvision import transforms, datasets
 from torchvision.transforms.transforms import RandomCrop
@@ -43,25 +44,22 @@ def auto_statistics(data_path, data_index, batch_size, num_workers, input_size):
 
 def generate_dataset_from_folder(data_path, train_transform, test_transform):
     train_path = os.path.join(data_path, 'train')
-    test_path = os.path.join(data_path, 'test')
     val_path = os.path.join(data_path, 'val')
 
     train_dataset = CustomizedImageFolder(train_path, train_transform, loader=pil_loader)
-    test_dataset = CustomizedImageFolder(test_path, test_transform, loader=pil_loader)
     val_dataset = CustomizedImageFolder(val_path, test_transform, loader=pil_loader)
 
-    return train_dataset, test_dataset, val_dataset
+    return train_dataset, val_dataset
 
 
 def generate_dataset_from_pickle(pkl, train_transform, test_transform):
     data = pickle.load(open(pkl, 'rb'))
-    train_set, test_set, val_set = data['train'], data['test'], data['val']
+    train_set, val_set = data['train'], data['val']
 
-    train_dataset = DatasetFromDict(train_set, train_transform, loader=pil_loader, hasmask=True)
-    test_dataset = DatasetFromDict(test_set, test_transform, loader=pil_loader)
+    train_dataset = DatasetFromDict(train_set, train_transform, loader=pil_loader, fov_mask=True)
     val_dataset = DatasetFromDict(val_set, test_transform, loader=pil_loader)
 
-    return train_dataset, test_dataset, val_dataset
+    return train_dataset, val_dataset
 
 
 def data_transforms(data_config):
@@ -73,21 +71,6 @@ def data_transforms(data_config):
         transforms.Resize((input_size, input_size)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
-        # transforms.ColorJitter(
-        #     brightness=data_aug['brightness'],
-        #     contrast=data_aug['contrast'],
-        #     saturation=data_aug['saturation'],
-        #     hue=data_aug['hue']
-        # ),
-        # transforms.RandomResizedCrop(
-        #     size=(input_size, input_size),
-        #     scale=data_aug['scale'],
-        #     ratio=data_aug['ratio']
-        # ),
-        # transforms.RandomAffine(
-        #     degrees=data_aug['degrees'],
-        #     # translate=data_aug['translate']
-        # ),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
@@ -117,12 +100,12 @@ class CustomizedImageFolder(datasets.ImageFolder):
 
 
 class DatasetFromDict(Dataset):
-    def __init__(self, imgs, transform=None, loader=pil_loader, hasmask=False):
+    def __init__(self, imgs, transform=None, loader=pil_loader, fov_mask=False):
         super(DatasetFromDict, self).__init__()
         self.imgs = imgs
         self.loader = loader
         self.transform = transform
-        self.hasmask = hasmask
+        self.fov_mask = fov_mask
 
         self.mask_transform = transforms.Compose([
             transforms.Resize((224, 224)),
@@ -133,7 +116,7 @@ class DatasetFromDict(Dataset):
         return len(self.imgs)
 
     def __getitem__(self, index):
-        if self.hasmask:
+        if self.fov_mask:
             img_path, mask_path = self.imgs[index]
             img = self.loader(img_path)
             mask = self.loader(mask_path)
@@ -143,7 +126,7 @@ class DatasetFromDict(Dataset):
                 img = self.transform(img)
             return img, mask
         else:
-            img_path, mask_path = self.imgs[index]
+            img_path, _ = self.imgs[index]
             img = self.loader(img_path)
 
             if self.transform is not None:

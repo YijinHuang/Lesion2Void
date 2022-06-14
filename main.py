@@ -8,8 +8,8 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
 from config import *
+from train import train
 from metrics import Estimator
-from train import train, evaluate
 from data import generate_dataset
 from modules import generate_model
 from utils import print_config, select_out_features
@@ -56,7 +56,7 @@ def main():
     )
 
     # create dataset
-    train_dataset, test_dataset, val_dataset = generate_dataset(
+    train_dataset, val_dataset = generate_dataset(
         DATA_CONFIG,
         BASIC_CONFIG['data_path'],
         BASIC_CONFIG['data_index'],

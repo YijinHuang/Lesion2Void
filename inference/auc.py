@@ -1,3 +1,5 @@
+import os
+import argparse
 import cv2 as cv
 import numpy as np
 from sklearn import metrics
@@ -30,8 +32,8 @@ def postprocess(diff):
 
 def main(folder, eval_channel, eval_grade):
     print('Evaluating {}'.format(folder))
-    negs = np.load('./diffs/{}_0.npy'.format(folder))
-    posses = [np.load('./diffs/{}_{}.npy'.format(folder, i)) for i in eval_grade]
+    negs = np.load(os.path.join(folder, 'grade_0.npy'))
+    posses = [np.load(os.path.join(folder, 'grade_{}.npy'.format(i))) for i in eval_grade]
 
     # Normalization
     for idx in range(len(negs)):
@@ -52,12 +54,12 @@ def main(folder, eval_channel, eval_grade):
             processed_poss[-1].append(postprocess(sample[eval_channel]).sum())
 
     # calcuate AUC
-    for pos in processed_poss:
+    for i, pos in enumerate(processed_poss):
         score = auc(processed_negs, pos)
-        print('{:.6f}'.format(score.item()))
+        print('grade 0 vs {}: {:.6f}'.format(i, score.item()))
 
     score = auc(processed_negs, np.concatenate(processed_poss, axis=0))
-    print('{:.6f}'.format(score.item()))
+    print('grade 0 vs all: {:.6f}'.format(score.item()))
 
 
 def auc(neg, pos):
@@ -76,7 +78,15 @@ def auc(neg, pos):
 
 
 if __name__ == '__main__':
-    diffs_save_folder = '/path/to/save/difference/result'
+    parser = argparse.ArgumentParser(allow_abbrev=True)
+    parser.add_argument(
+        '--diff-dir',
+        type=str,
+        help='Path to save residual map.'
+    )
+    args = parser.parse_args()
+    diffs_save_folder = args.diff_dir
+
     eval_channel = 1
     eval_grade = range(1, 5)
     main(diffs_save_folder, eval_channel, eval_grade)

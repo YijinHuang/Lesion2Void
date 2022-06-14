@@ -1,12 +1,15 @@
 import os
-import random
+import sys
 import torch
+import random
+import argparse
 import cv2 as cv
 import numpy as np
 from tqdm import tqdm
 from PIL import Image
 from torchvision import transforms
 
+sys.path.insert(0, '..')
 from mask import Masker
 from config import *
 from modules import generate_model
@@ -34,17 +37,13 @@ def load_model(weights_path, device):
     return model
 
 
-def predict(model, batch_size, preprocess, device, imgs, npy_folder, grid_size, pixel_size):
+def predict(model, batch_size, preprocess, device, imgs, npy_folder, grid_size, patch_size):
     model.eval()
     torch.set_grad_enabled(False)
 
-    masker = Masker(width=grid_size, pixel_size=pixel_size, mode='random')
+    masker = Masker(width=grid_size, pixel_size=patch_size, mode='random')
     progress = tqdm(imgs)
     total_diff = []
-
-    # mask
-    circle = np.zeros((224, 224), dtype=np.uint8)
-    circle = cv.circle(circle, (112, 112), 100, 1, -1)
 
     img = None
     for num, path in enumerate(progress):
@@ -62,7 +61,7 @@ def predict(model, batch_size, preprocess, device, imgs, npy_folder, grid_size, 
 
         diffs = []
         for step in range(0, masker.n_masks):
-            if not (step % (pixel_size / 2) == 0 and (step // grid_size) % (pixel_size / 2) == 0):
+            if not (step % (patch_size / 2) == 0 and (step // grid_size) % (patch_size / 2) == 0):
                 continue
             noisy, mask = masker.mask(img, step)
             recon_img = model(noisy)
@@ -76,21 +75,38 @@ def predict(model, batch_size, preprocess, device, imgs, npy_folder, grid_size, 
 
 
 if __name__ == "__main__":
-    random.seed(0)
-    weights_path = '/path/to/model_save_folder/best_validation_weights.pt'
-    eyeQ_test_folder = '/path/to/EyeQ/test/folder'
-    diffs_save_folder = '/path/to/save/difference/result'
+    parser = argparse.ArgumentParser(allow_abbrev=True)
+    parser.add_argument(
+        '--weights-path',
+        type=str,
+        help='Path to the model file.'
+    )
+    parser.add_argument(
+        '--test-dir',
+        type=str,
+        help='Path to the EyeQ test folder.'
+    )
+    parser.add_argument(
+        '--diff-dir',
+        type=str,
+        help='Path to save residual map.'
+    )
+    args = parser.parse_args()
 
+    random.seed(0)
+    weights_path = args.weights_path
+    eyeQ_test_folder = args.test_dir
+    diffs_save_folder = args.diff_dir
 
     device = 'cuda'
     model = load_model(weights_path, device)
     preprocess = define_preprocess()
-    gride_size = 48
-    pixel_size = 16
-    batch_size = 64
+    grid_size = TRAIN_CONFIG['grid_size']
+    patch_size = TRAIN_CONFIG['patch_size']
+    batch_size = TRAIN_CONFIG['batch_size']
     for i in range(5):
         src = '{}/{}'.format(eyeQ_test_folder, i)
         npy_folder = '{}/grade_{}.npy'.format(diffs_save_folder, i)
         imgs = [os.path.join(src, img) for img in os.listdir(src)]
 
-        result = predict(model, batch_size, preprocess, device, imgs, npy_folder, gride_size, pixel_size)
+        result = predict(model, batch_size, preprocess, device, imgs, npy_folder, grid_size, patch_size)

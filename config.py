@@ -95,6 +95,8 @@ TRAIN_CONFIG = {
     'pin_memory': True,  # enables fast data transfer to CUDA-enabled GPUs
     'sample_view': True,  # visualize images on Tensorboard
     'sample_view_interval': 100,  # the steps interval of saving samples on Tensorboard. Note that frequently saving images will slow down the training speed.
+    'grid_size': 48, # mask hyperparameters for Lesion2Void
+    'patch_size': 16, # mask hyperparameters for Lesion2Void
 }
 
 # you can add any networks in torchvision.models
